@@ -1,4 +1,5 @@
 Introduction
+
 The goal of this project is to implement a traffic simulation using hardware and software. The hardware components consist of LED’s, three shift registers, a potentiometer, resistors, and wires. The software is written in C and uses FreeRTOS, a real time operating system for microcontrollers. The features used for the project include tasks, queues, and software timers. 
 
 The project simulates a one way vehicle traffic intersection (no cross street). The car positions are represented by a horizontal line of green LED’s. When the LED is on, a car is present at that position, and when an LED is off, no car is currently at the position. Splitting the car LED’s into two halves is three other LED’s (green, yellow, and red) that represent traffic lights. The cars proceed through the intersection when the light is green or yellow, but must stop at the intersection when the light is red. This means that while the traffic light is red, the cars before the intersection bunch up filling any empty positions. The cars after the intersection aren’t affected by the traffic light. 
@@ -6,14 +7,15 @@ The project simulates a one way vehicle traffic intersection (no cross street). 
 The rate at which traffic is generated is controlled by a potentiometer. The potentiometer value is also proportional to the duration of the traffic lights. This project relies heavily on the flow of data between the hardware and software components. 
 Design Solution 
 Our design involved breaking the problem down into smaller subtasks. These could be categorized as circuit design, GPIO initialization, ADC initialization, traffic flow adjustment, traffic generation, LED display, traffic light timers.
-Design document
 
 Our design process began with creating an early sketch of the overall data flow and description of how the four tasks and queues worked together. This is shown in image 1 above. Overall, the sketch is a good representation of the final design. The most significant change that we made was the removal of the “traffic light state task”. We instead used software timer callback functions to control the switching and duration of the traffic lights and the task became unnecessary. 
 
 Circuit design
+
 Our circuit involved three serialized 74HC164 shift registers. These are serialized by synchronizing the clock and reset pins of all three shift registers, as well as connecting the H pin to the next shift registers data pin. Each output pin from the shift registers was connected to an LED representing a car. Our traffic lights were controlled directly by GPIOB ports. The potentiometer was set up in a standard way, drawing 5 volts and sending its output to GPIOA.
 
 GPIO initialization
+
 To initialize our GPIO, we first enabled all of the GPIO clocks. We then configured GPIOC for the shift registers, and GPIOB for the traffic light control. These were configured exactly as described in the provided slides. We also made sure to set the shift register reset bit to 0 at this point.
 ADC initialization
 To initialize our ADC, we first enabled the ADC clock. We then configured the ADC exactly as described in the provided slides. We then enabled the ADC, and set it to channel 1.
@@ -35,6 +37,7 @@ Once the set time had elapsed, the yellow light callback function was executed. 
 Once the set time had elapsed, the red light callback function was executed. This function set the light to green, and sent this value to other functions via queue. The period for the green light timer was then calculated based on the ADC value (received from a queue). The period was calculated to be directly proportional to the ADC value. The green light callback function was then called.
 
 Discussion
+
 In this project, we attempted to use the specifications given in the lab manual and lab slides as closely as possible. This way, we could focus on ensuring our software was well planned and developed, rather than worrying about if problems were coming from venturing away from the lab manual specifications.
 
 Our implementation was smooth for the most part. Early on, we ran into some trouble getting started with the circuitry and getting LEDs to turn on. This turned out to be mostly due to incorrect initialization functions. Once we got these sorted out, we improved our project steadily throughout the implementation project. 
@@ -42,7 +45,9 @@ Our implementation was smooth for the most part. Early on, we ran into some trou
 Before writing any software, we planned out how our code would be split into tasks and functions. This made the development process much more efficient, as there were very few instances of creating esoteric and overly complex code. We also made use of the oscilloscope for this project. This was very useful at certain points, as it was at times not clear our software was failing to pick up on an input signal, or if the signal was failing to be sent.
 Limitations and Possible Improvements
 Looking back on this project, we could have improved our breadboard circuitry techniques. We got caught up in the development cycle and failed to plan well at the start, which created a confusing mess of wires. This was improved later on, but if we had planned out our circuitry before starting the development process it would have saved a lot of headaches and debugging.
+
 Summary
+
 The purpose of this project was to get hands-on experience with real time systems by creating a simulated intersection using LEDs to represent cars and a potentiometer to control the flow of traffic. The project was somewhat difficult to start, as we had limited experience with some of the hardware modules. But due to proper design planning at the beginning, once we got started our project moved along steadily. Most of our bugs originated at the intersection of software and hardware. It was difficult to know if the hardware was failing or if the software was written incorrectly. However, the oscilloscope was very useful when diagnosing these issues.
 Despite some setbacks early on, we were able to implement a fully functional project with time to spare before the deadline, which allowed us to spend some time cleaning up our circuitry, as well as our code.
 
